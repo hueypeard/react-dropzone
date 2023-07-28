@@ -172,7 +172,7 @@
     "webpack": "^5.67.0"
   },
   "typings": "typings/react-dropzone.d.ts",
-  "version": "12.2.6",
+  "version": "12.2.7",
   "engines": {
     "node": ">= 10.13"
   },
