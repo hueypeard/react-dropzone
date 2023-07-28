@@ -801,6 +801,7 @@ describe("useDropzone() hook", () => {
       expect(parentProps.onDragLeave).not.toHaveBeenCalled();
 
       await act(() => fireEvent.drop(innerDropzone, data));
+
       expect(innerProps.onDrop).toHaveBeenCalled();
       expect(parentProps.onDrop).not.toHaveBeenCalled();
     });

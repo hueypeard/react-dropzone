@@ -13,6 +13,8 @@ Simple React hook to create a HTML5-compliant drag'n'drop zone for files.
 
 Documentation and examples at https://react-dropzone.js.org. Source code at https://github.com/react-dropzone/react-dropzone/.
 
+## Fork notes
+This fork adds support for async validation functions. Please note that the noDragEventsBubbling parameter does _not_ work.
 
 ## Installation
 Install it from npm and include it in your React build process (using [Webpack](http://webpack.github.io/), [Browserify](http://browserify.org/), etc).

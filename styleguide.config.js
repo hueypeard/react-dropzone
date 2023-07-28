@@ -1,6 +1,5 @@
 /* eslint import/no-extraneous-dependencies: 0 */
 const path = require("path");
-const { createConfig, babel, css, devServer } = require("webpack-blocks");
 
 // https://react-styleguidist.js.org/docs/configuration.html
 module.exports = {
@@ -10,14 +9,21 @@ module.exports = {
     favicon:
       "https://github.com/react-dropzone/react-dropzone/raw/master/logo/logo.png",
   },
-  webpackConfig: createConfig([
-    babel(),
-    css(),
-    devServer({
-      disableHostCheck: true,
-      host: "0.0.0.0",
-    }),
-  ]),
+  webpackConfig: {
+    module: {
+      rules: [
+        {
+          test: /\.jsx?$/,
+          exclude: /node_modules/,
+          loader: "babel-loader",
+        },
+        {
+          test: /\.css$/,
+          use: ["style-loader", "css-loader"],
+        },
+      ],
+    },
+  },
   exampleMode: "expand",
   usageMode: "expand",
   showSidebar: true,

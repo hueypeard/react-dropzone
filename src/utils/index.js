@@ -76,6 +76,16 @@ function isDefined(value) {
   return value !== undefined && value !== null;
 }
 
+async function asyncEvery(array, predicate) {
+  for (const element of array) {
+    const result = await predicate(element);
+    if (!result) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  *
  * @param {object} options
@@ -88,7 +98,7 @@ function isDefined(value) {
  * @param {(f: File) => FileError|FileError[]|null} [options.validator]
  * @returns
  */
-export function allFilesAccepted({
+export const allFilesAccepted = async ({
   files,
   accept,
   minSize,
@@ -96,7 +106,7 @@ export function allFilesAccepted({
   multiple,
   maxFiles,
   validator,
-}) {
+}) => {
   if (
     (!multiple && files.length > 1) ||
     (multiple && maxFiles >= 1 && files.length > maxFiles)
@@ -104,13 +114,13 @@ export function allFilesAccepted({
     return false;
   }
 
-  return files.every((file) => {
+  return await asyncEvery(files, async (file) => {
     const [accepted] = fileAccepted(file, accept);
     const [sizeMatch] = fileMatchSize(file, minSize, maxSize);
-    const customErrors = validator ? validator(file) : null;
+    const customErrors = validator ? await validator(file) : null;
     return accepted && sizeMatch && !customErrors;
   });
-}
+};
 
 // React's synthetic events has event.isPropagationStopped,
 // but to remain compatibility with other libs (Preact) fall back

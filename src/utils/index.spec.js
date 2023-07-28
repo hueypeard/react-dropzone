@@ -309,7 +309,7 @@ describe("allFilesAccepted()", () => {
   beforeEach(async () => {
     utils = await import("./index");
   });
-  it("rejects file when multiple accept criteria", () => {
+  it("rejects file when multiple accept criteria", async () => {
     const files = [
       createFile("hamster.pdf", 100, "application/pdf"),
       createFile("fish.pdf", 100, "application/pdf"),
@@ -318,35 +318,41 @@ describe("allFilesAccepted()", () => {
       createFile("cats.gif", 1234, "image/gif"),
       createFile("dogs.gif", 2345, "image/jpeg"),
     ];
-    expect(utils.allFilesAccepted({ files, multiple: true })).toEqual(true);
+    expect(await utils.allFilesAccepted({ files, multiple: true })).toEqual(
+      true
+    );
     expect(
-      utils.allFilesAccepted({ files, multiple: true, maxFiles: 10 })
+      await utils.allFilesAccepted({ files, multiple: true, maxFiles: 10 })
     ).toEqual(true);
     expect(
-      utils.allFilesAccepted({ files, multiple: false, maxFiles: 10 })
+      await utils.allFilesAccepted({ files, multiple: false, maxFiles: 10 })
     ).toEqual(false);
     expect(
-      utils.allFilesAccepted({ files, multiple: true, accept: "image/jpeg" })
+      await utils.allFilesAccepted({
+        files,
+        multiple: true,
+        accept: "image/jpeg",
+      })
     ).toEqual(false);
     expect(
-      utils.allFilesAccepted({
+      await utils.allFilesAccepted({
         files: images,
         multiple: true,
         accept: "image/*",
       })
     ).toEqual(true);
     expect(
-      utils.allFilesAccepted({ files, multiple: true, minSize: 110 })
+      await utils.allFilesAccepted({ files, multiple: true, minSize: 110 })
     ).toEqual(false);
     expect(
-      utils.allFilesAccepted({ files, multiple: true, maxSize: 99 })
+      await utils.allFilesAccepted({ files, multiple: true, maxSize: 99 })
     ).toEqual(false);
     expect(
-      utils.allFilesAccepted({ files, multiple: true, maxFiles: 1 })
+      await utils.allFilesAccepted({ files, multiple: true, maxFiles: 1 })
     ).toEqual(false);
 
     expect(
-      utils.allFilesAccepted({
+      await utils.allFilesAccepted({
         files,
         validator: () => ({ code: "not-allowed", message: "Cannot do this!" }),
       })

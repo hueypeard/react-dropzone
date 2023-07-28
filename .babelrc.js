@@ -1,9 +1,20 @@
 // https://babeljs.io/docs/en/configuration
 const presets = ['@babel/preset-react']
 if (process.env['BABEL_ENV'] === 'es') {
-  presets.unshift(['@babel/preset-env', { modules: false }])
+  presets.unshift(['@babel/preset-env', {
+    modules: false, "targets": {
+      "node": "10" // the target node version, boolean true, or "current".
+    }
+  }])
 } else {
-  presets.unshift('@babel/preset-env')
+  presets.unshift([
+    "@babel/preset-env",
+    {
+      "targets": {
+        "node": "10" // the target node version, boolean true, or "current".
+      }
+    }
+  ])
 }
 
 const plugins = [

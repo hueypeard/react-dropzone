@@ -562,7 +562,7 @@ export function useDropzone(props = {}) {
 
       if (isEvtWithFiles(event)) {
         Promise.resolve(getFilesFromEvent(event))
-          .then((files) => {
+          .then(async (files) => {
             if (isPropagationStopped(event) && !noDragEventsBubbling) {
               return;
             }
@@ -570,7 +570,7 @@ export function useDropzone(props = {}) {
             const fileCount = files.length;
             const isDragAccept =
               fileCount > 0 &&
-              allFilesAccepted({
+              (await allFilesAccepted({
                 files,
                 accept: acceptAttr,
                 minSize,
@@ -578,7 +578,7 @@ export function useDropzone(props = {}) {
                 multiple,
                 maxFiles,
                 validator,
-              });
+              }));
             const isDragReject = fileCount > 0 && !isDragAccept;
 
             dispatch({
@@ -667,27 +667,37 @@ export function useDropzone(props = {}) {
   );
 
   const setFiles = useCallback(
-    (files, event) => {
-      const acceptedFiles = [];
-      const fileRejections = [];
+    async (files, event) => {
+      const fileResults = await Promise.all(
+        files.map(async (file) => {
+          const [accepted, acceptError] = fileAccepted(file, acceptAttr);
+          const [sizeMatch, sizeError] = fileMatchSize(file, minSize, maxSize);
+          const customErrors = validator ? await validator(file) : null;
 
-      files.forEach((file) => {
-        const [accepted, acceptError] = fileAccepted(file, acceptAttr);
-        const [sizeMatch, sizeError] = fileMatchSize(file, minSize, maxSize);
-        const customErrors = validator ? validator(file) : null;
+          if (accepted && sizeMatch && !customErrors) {
+            return { accepted: true, file, errors: [] };
+          } else {
+            let errors = [acceptError, sizeError];
 
-        if (accepted && sizeMatch && !customErrors) {
-          acceptedFiles.push(file);
-        } else {
-          let errors = [acceptError, sizeError];
+            if (customErrors) {
+              errors = errors.concat(customErrors);
+            }
 
-          if (customErrors) {
-            errors = errors.concat(customErrors);
+            return { accepted: false, file, errors: errors.filter((e) => e) };
           }
+        })
+      );
 
-          fileRejections.push({ file, errors: errors.filter((e) => e) });
-        }
-      });
+      const acceptedFiles = fileResults
+        .filter((fileResult) => fileResult.accepted)
+        .map((fileResult) => fileResult.file);
+
+      const fileRejections = fileResults
+        .filter((fileResult) => !fileResult.accepted)
+        .map((fileResult) => ({
+          file: fileResult.file,
+          errors: fileResult.errors,
+        }));
 
       if (
         (!multiple && acceptedFiles.length > 1) ||
@@ -743,11 +753,11 @@ export function useDropzone(props = {}) {
 
       if (isEvtWithFiles(event)) {
         Promise.resolve(getFilesFromEvent(event))
-          .then((files) => {
+          .then(async (files) => {
             if (isPropagationStopped(event) && !noDragEventsBubbling) {
               return;
             }
-            setFiles(files, event);
+            await setFiles(files, event);
           })
           .catch((e) => onErrCb(e));
       }
